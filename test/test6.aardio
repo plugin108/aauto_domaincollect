@@ -1,0 +1,11 @@
+import console; 
+//var num = console.getNumber( "请输入数值:" )
+
+var str = '210 : Domain name is available';
+var str1 = '210 : Domain '+'name is available';
+if(str1==str){
+	console.log('asdf')
+}
+
+console.log("您输入的是" ,num );
+console.pause(true);

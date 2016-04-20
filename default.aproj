@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<project ver="10" name="抓取网址是否注册信息" libEmbed="true" icon="..." ui="win" output="抓取网址是否注册信息.exe" CompanyName="单位名称" FileDescription="抓取网址是否注册信息" LegalCopyright="Copyright (C) 单位名称 2016" ProductName="抓取网址是否注册信息" InternalName="抓取网址是否注册信息" FileVersion="0.0.0.03" ProductVersion="0.0.0.03" publishDir="/Publish/" dstrip="false">
+	<file name="main.aardio" path="default.main.aardio" comment="default.main.aardio"/>
+	<folder name="资源文件" path="res" embed="true">
+		<folder name="筛选器" path="res\筛选器" comment="目录" embed="false"/>
+	</folder>
+	<folder name="test" path="test" comment="目录" embed="false">
+		<file name="test6.aardio" path="test\test6.aardio" comment="test\test6.aardio"/>
+		<file name="mainbackup.aardio" path="test\mainbackup.aardio" comment="test\mainbackup.aardio"/>
+		<file name="test5.aardio" path="test\test5.aardio" comment="test\test5.aardio"/>
+		<file name="test4.aardio" path="test\test4.aardio" comment="test\test4.aardio"/>
+		<file name="test3.aardio" path="test\test3.aardio" comment="test\test3.aardio"/>
+		<file name="test2.aardio" path="test\test2.aardio" comment="test\test2.aardio"/>
+		<file name="test1.aardio" path="test\test1.aardio" comment="test\test1..aardio"/>
+	</folder>
+</project>

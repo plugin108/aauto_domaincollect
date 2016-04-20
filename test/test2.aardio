@@ -1,0 +1,75 @@
+import win.ui;
+/*DSG{{*/
+mainForm = win.form(text="aardio form";right=759;bottom=469)
+mainForm.add(
+edit={cls="edit";left=14;top=246;right=743;bottom=455;db=1;dl=1;dr=1;dt=1;edge=1;multiline=1;z=1}
+)
+/*}}*/
+
+import inet.http;
+var http=inet.http();
+
+//var str= http.get("http://www.300.cn/whois_do/show",postData);//,"Cookie:"+  wb2.document.cookie
+
+
+import console
+import string.xml
+//var str = http.get("http://www.300.cn/whois_do/show?domain=weiyu.com");
+
+//html.write(str);
+//var eles = html.queryEles(className = "domain-list");
+var str = http.get("http://panda.www.net.cn/cgi-bin/check.cgi?area_domain=www."+"111111"+".com");
+
+var xmlDoc = string.xml(str)
+
+console.varDump(xmlDoc[2][1][1]['text']);//码
+console.varDump(xmlDoc[2][2][1]['text']);//域名
+console.varDump(xmlDoc[2][3][1]['text']);
+/*
+original=210 : Domain name is available     表示域名可以注册
+original=211 : Domain name is not available 表示域名已经注册
+original=212 : Domain name is invalid   表示域名参数传输错误
+original=213 : Time out 查询超时
+*/
+//console.log(str)
+//console.varDump(eles[1].innerHTML);
+
+
+
+
+
+
+
+
+
+/*
+
+
+
+import thread.command;
+var listener = thread.command();
+listener.print = function( ... ){
+    mainForm.edit.print( ... ) //将线程传过来的参数追加输出到文本框
+} 
+
+//创建工作线程,线程内错误信息默认输出到控制台
+thread.invoke(
+
+    function(hwnd){ 
+    
+        //必须在线程函数内部导入需要的库
+        import thread.command;
+        
+        //调用界面线程的命令
+        thread.command.print("hello world",1,2,3);
+        
+        //也可以用post方法异步调用线程命令,不会等待调用完成
+        thread.command.post("print","hello world",1,2,3);
+    } 
+);
+
+
+mainForm.show() 
+*/
+return win.loopMessage(); 
+

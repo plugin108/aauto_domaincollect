@@ -1,0 +1,213 @@
+import win.ui;
+/*DSG{{*/
+mainForm = win.form(text="aardio form";right=759;bottom=469)
+mainForm.add(
+button={cls="button";text="开始扫描";left=474;top=10;right=600;bottom=37;z=2};
+button2={cls="button";text="添加字段";left=215;top=10;right=352;bottom=37;z=3};
+button3={cls="button";text="查询可用";left=604;top=10;right=725;bottom=36;z=5};
+button4={cls="button";text="查看字段";left=358;top=10;right=469;bottom=36;z=7};
+edit={cls="edit";left=8;top=9;right=209;bottom=38;db=1;dl=1;dr=1;dt=1;edge=1;multiline=1;z=1};
+edit2={cls="edit";left=12;top=96;right=745;bottom=457;edge=1;multiline=1;z=6};
+static={cls="static";left=15;top=50;right=741;bottom=78;notify=1;transparent=1;z=4}
+)
+/*}}*/
+
+import com.lite;
+var ReportX = com.lite("/ReportX.ocx")
+var rep = ReportX.createEmbed(mainForm.edit2,"{A5DA6E97-1D4C-4708-B705-84A45716B4DD}")
+var repObject = rep._object;
+
+
+
+
+import console
+import sqlite;
+
+//预备数据库基础环境
+var db = sqlite('getwww.db');
+if( not db.existsTable("pandanet") ) {
+	db.exec( "CREATE TABLE pandanet( id INTEGER PRIMARY KEY AUTOINCREMENT,key varchar(200),status int(11),createDate datetime,original varchar(100) );") ;
+}
+
+if( not db.existsTable("parts") ) {
+	db.exec( "CREATE TABLE parts( id INTEGER PRIMARY KEY AUTOINCREMENT,key varchar(200),createDate datetime);") ;
+}
+
+mainForm.button3.oncommand = function(id,event){
+	
+ 
+//调用ReportX报表方法
+//repObject.OpenReport( io.fullpath("/Example/预算计划比较.rpxe"));
+
+repObject.ColCount=2;
+repObject. SetColWidth(2,500);
+var i = 1;
+for(i=1; #testTab; 1) {
+	for(j=1;#testTab[i];1){
+		repObject.SetCellValue(j,i,testTab[i][j]);  
+	}
+}
+for id,key in db.each("SELECT id,key FROM pandanet where status =1 order by id desc") {
+	repObject.SetCellValue(1,i,id);
+	repObject.SetCellValue(2,i,key);
+	i++;
+}
+repObject.RowCount=i;
+	
+	
+}
+mainForm.button4.oncommand = function(id,event){
+	
+ 
+//调用ReportX报表方法
+//repObject.OpenReport( io.fullpath("/Example/预算计划比较.rpxe"));
+
+repObject.ColCount=2;
+repObject. SetColWidth(2,500);
+var i = 1;
+for(i=1; #testTab; 1) {
+	for(j=1;#testTab[i];1){
+		repObject.SetCellValue(j,i,testTab[i][j]);  
+	}
+}
+for id,key in db.each("SELECT id,key FROM parts order by id desc") {
+	repObject.SetCellValue(1,i,id);
+	repObject.SetCellValue(2,i,key);
+	i++;
+}
+repObject.RowCount=i;
+	
+	
+}
+
+mainForm.button2.oncommand = function(id,event){
+	var command = db.prepare("insert into parts(
+					key,createDate
+				) values (
+					@key,@createDate
+				);" ) 
+			command.bind.parameterByNamesAt( //绑定命名参数 
+				key =mainForm.edit.text ;createDate = time();
+			);
+			command.step();//执行命令
+	mainForm.edit.text='';
+}
+
+
+mainForm.button.oncommand = function(id,event){
+	//创建工作线程,线程内错误信息默认输出到控制台
+	thread.invoke(
+	
+    	function(hwnd){ 
+    	
+        	//必须在线程函数内部导入需要的库
+        	import thread.command;
+             	
+        	//也可以用post方法异步调用线程命令,不会等待调用完成
+        	thread.command.post("checkwww");
+    	} 
+	);	
+}
+
+
+import thread.command;
+var listener = thread.command();
+listener.checkwww = function(){
+	import console
+	import sqlite;
+	
+	
+	import inet.http;
+	var http=inet.http();
+	import string.xml
+
+
+	//预备数据库基础环境
+	var db = sqlite('getwww.db');
+	if( not db.existsTable("pandanet") ) {
+		db.exec( "CREATE TABLE pandanet( id INTEGER PRIMARY KEY AUTOINCREMENT,key varchar(200),status int(11),createDate datetime,original varchar(100) );") ;
+	}
+	
+	if( not db.existsTable("parts") ) {
+		db.exec( "CREATE TABLE parts( id INTEGER PRIMARY KEY AUTOINCREMENT,key varchar(200),createDate datetime);") ;
+	}
+	
+	
+	var flag = 1;
+		var tab={}
+		tab[0] ='';
+	//var tab = {};
+	var i = 1;
+	//查找所有的分解字段
+	for key in db.each("SELECT key FROM parts") {
+		tab[i]=key;
+		i++;
+	}
+//	console.log(i);
+	
+	if(i==1){
+		flag = 0;
+	}
+	
+	var length = i*i;
+	var j = 1;
+	while(length >j){
+		try{
+			var str = '';
+			var flag = 1;
+			var temp = j;
+			
+			while(flag==1){
+				if(temp<i&&temp/i<1){
+					flag=0;
+					str = string.concat(str,tostring(tab[temp%i]));
+				}else{
+					str = string.concat(str,tostring(tab[temp%i]));
+					temp = (temp-temp%i)/i;	
+				}	
+			}
+			var urllink = str+".com";
+			
+			mainForm.static.text='正在校验：'+urllink;
+			
+			var result = db.stepQuery("SELECT * FROM [pandanet]",{ key = urllink}) //可选使用表对象指定where条件参数
+				
+			if(result == null ){
+			
+				var str = http.get("http://panda.www.net.cn/cgi-bin/check.cgi?area_domain="+urllink);
+				var xmlDoc = string.xml(str)
+	
+				//console.log(xmlDoc[2][2][1]['text']+'  '+xmlDoc[2][3][1]['text']);
+				var status = 0;
+				if(tostring(xmlDoc[2][3][1]['text'])=='210 : Domain name is available'){
+					status = 1;
+				}
+				//console.varDump(xmlDoc[2][1][1]['text']);//码
+				//console.varDump(xmlDoc[2][2][1]['text']);//域名
+				//console.varDump(xmlDoc[2][3][1]['text']);
+				var command = db.prepare("insert into pandanet(
+						key,createDate,original,status
+					) values (
+						@key,@createDate, @original,@status
+					);" ) 
+				command.bind.parameterByNamesAt( //绑定命名参数 
+					key = xmlDoc[2][2][1]['text'];createDate = time();original = xmlDoc[2][3][1]['text'];status=status;
+				);
+				command.step();//执行命令
+						
+			}
+		}
+	//	console.log("j:"+tostring(j))
+		j++;
+		
+	
+	}
+	
+//	console.log("over");
+	//console.pause(true);
+	
+} 
+
+
+mainForm.show() 
+return win.loopMessage(); 

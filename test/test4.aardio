@@ -1,0 +1,82 @@
+import console
+import sqlite;
+
+
+import inet.http;
+var http=inet.http();
+import string.xml
+
+	//预备数据库基础环境
+	var db = sqlite('getwww.db');
+	if( not db.existsTable("pandanet") ) {
+		db.exec( "CREATE TABLE pandanet( id INTEGER PRIMARY KEY AUTOINCREMENT,key varchar(200),createDate datetime,original varchar(100) );") ;
+	}
+	
+	if( not db.existsTable("parts") ) {
+		db.exec( "CREATE TABLE parts( id INTEGER PRIMARY KEY AUTOINCREMENT,key varchar(200),createDate datetime);") ;
+	}
+	
+	var flag = 1;
+		var tab={}
+		tab[0] ='';
+	//var tab = {};
+	var i = 1;
+	//查找所有的分解字段
+	for key in db.each("SELECT key FROM parts") {
+		tab[i]=key;
+		i++;
+	}
+//	console.log(i);
+	
+	if(i==1){
+		flag = 0;
+	}
+	
+	var length = i*i;
+	var j = 1;
+	while(length >j){
+		var str = '';
+		var flag = 1;
+		var temp = j;
+		
+		while(flag==1){
+			if(temp<i&&temp/i<1){
+				flag=0;
+				str = string.concat(str,tostring(tab[temp%i]));
+			}else{
+				str = string.concat(str,tostring(tab[temp%i]));
+				temp = (temp-temp%i)/i;	
+			}	
+		}
+		var result = db.stepQuery("SELECT * FROM [pandanet]",{ key = "www."+str+".com"}) //可选使用表对象指定where条件参数
+			
+		if(result == null ){
+		
+			var str = http.get("http://panda.www.net.cn/cgi-bin/check.cgi?area_domain=www."+str+".com");
+
+			var xmlDoc = string.xml(str)
+
+			console.log(xmlDoc[2][2][1]['text']+'  '+xmlDoc[2][3][1]['text']);
+			//console.varDump(xmlDoc[2][1][1]['text']);//码
+			//console.varDump(xmlDoc[2][2][1]['text']);//域名
+			//console.varDump(xmlDoc[2][3][1]['text']);
+			
+		
+			var command = db.prepare("insert into pandanet(
+					key,createDate,original
+				) values (
+					@key,@createDate, @original
+				);" ) 
+			command.bind.parameterByNamesAt( //绑定命名参数 
+				key = xmlDoc[2][2][1]['text'];createDate = time();original = xmlDoc[2][3][1]['text'];
+			);
+			command.step();//执行命令
+					
+		}
+		j++;
+	
+	}
+	
+	console.log("over");
+	console.pause(true);
+	
