@@ -6,11 +6,21 @@ button={cls="button";text="开始扫描";left=474;top=10;right=600;bottom=37;z=2
 button2={cls="button";text="添加字段";left=215;top=10;right=352;bottom=37;z=3};
 button3={cls="button";text="查询可用";left=604;top=10;right=725;bottom=36;z=5};
 button4={cls="button";text="查看字段";left=358;top=10;right=469;bottom=36;z=7};
+checkbox={cls="checkbox";text="checkbox";left=665;top=51;right=679;bottom=66;checked=1;z=8};
 edit={cls="edit";left=8;top=9;right=209;bottom=38;db=1;dl=1;dr=1;dt=1;edge=1;multiline=1;z=1};
 edit2={cls="edit";left=12;top=96;right=745;bottom=457;edge=1;multiline=1;z=6};
-static={cls="static";left=15;top=50;right=741;bottom=78;notify=1;transparent=1;z=4}
+static={cls="static";left=15;top=50;right=653;bottom=76;notify=1;transparent=1;z=4};
+static2={cls="static";text="强制校验";left=686;top=52;right=741;bottom=81;transparent=1;z=9}
 )
 /*}}*/
+
+mainForm.checkbox.oncommand = function(id,event){
+	//mainForm.msgbox( mainForm.checkbox.text );
+	import console;
+	console.log(mainForm.checkbox.checked);
+	
+}
+
 
 import com.lite;
 var ReportX = com.lite("/ReportX.ocx")
@@ -26,13 +36,13 @@ import sqlite;
 //预备数据库基础环境
 var db = sqlite('getwww.db');
 if( not db.existsTable("pandanet") ) {
-	db.exec( "CREATE TABLE pandanet( id INTEGER PRIMARY KEY AUTOINCREMENT,key varchar(200),status int(11),createDate datetime,original varchar(100) );") ;
+	db.exec( "CREATE TABLE pandanet( id INTEGER PRIMARY KEY AUTOINCREMENT,key varchar(200),status int(11),createDate datetime,updateDate datetime,original varchar(100) );") ;
 }
 
 if( not db.existsTable("parts") ) {
-	db.exec( "CREATE TABLE parts( id INTEGER PRIMARY KEY AUTOINCREMENT,key varchar(200),createDate datetime);") ;
+	db.exec( "CREATE TABLE parts( id INTEGER PRIMARY KEY AUTOINCREMENT,key varchar(200),createDate datetime,updateDate datetime);") ;
 }
-
+// 查询可用
 mainForm.button3.oncommand = function(id,event){
 	
  
@@ -56,6 +66,7 @@ repObject.RowCount=i;
 	
 	
 }
+// 查看字段
 mainForm.button4.oncommand = function(id,event){
 	
  
@@ -79,9 +90,13 @@ repObject.RowCount=i;
 	
 	
 }
-
+// 添加字段
 mainForm.button2.oncommand = function(id,event){
-	var command = db.prepare("insert into parts(
+
+	var result = db.stepQuery("SELECT * FROM [parts]",{ key = mainForm.edit.text});
+
+	if(result==null){
+		var command = db.prepare("insert into parts(
 					key,createDate
 				) values (
 					@key,@createDate
@@ -90,10 +105,15 @@ mainForm.button2.oncommand = function(id,event){
 				key =mainForm.edit.text ;createDate = time();
 			);
 			command.step();//执行命令
-	mainForm.edit.text='';
+		mainForm.edit.text='';
+	}else{
+		
+		win.msgbox("字段已经存在，请勿重复添加");
+	}
+	
 }
 
-
+//开始扫描
 mainForm.button.oncommand = function(id,event){
 	//创建工作线程,线程内错误信息默认输出到控制台
 	thread.invoke(
@@ -102,7 +122,7 @@ mainForm.button.oncommand = function(id,event){
     	
         	//必须在线程函数内部导入需要的库
         	import thread.command;
-             	
+           
         	//也可以用post方法异步调用线程命令,不会等待调用完成
         	thread.command.post("checkwww");
     	} 
@@ -115,12 +135,15 @@ var listener = thread.command();
 listener.checkwww = function(){
 	import console
 	import sqlite;
+	//console.log(mainForm.checkbox.checked);
 	
+	//mainForm.checkbox.checked 是否强制扫描
+	var ischecked = mainForm.checkbox.checked;
 	
 	import inet.http;
 	var http=inet.http();
 	import string.xml
-
+	
 
 	//预备数据库基础环境
 	var db = sqlite('getwww.db');
@@ -149,9 +172,14 @@ listener.checkwww = function(){
 		flag = 0;
 	}
 	
-	var length = i*i;
+	var length = i**i;
 	var j = 1;
+	//console.log(i)
+	//console.log(length);
 	while(length >j){
+		import console;
+		//console.log(j);
+		win.delay(100);
 		try{
 			var str = '';
 			var flag = 1;
@@ -168,10 +196,12 @@ listener.checkwww = function(){
 			}
 			var urllink = str+".com";
 			
-			mainForm.static.text='正在校验：'+urllink;
+			mainForm.static.text='正在校验：'+urllink+' 序号：'+j;
 			
 			var result = db.stepQuery("SELECT * FROM [pandanet]",{ key = urllink}) //可选使用表对象指定where条件参数
-				
+			//console.varDump(result);
+			
+			
 			if(result == null ){
 			
 				var str = http.get("http://panda.www.net.cn/cgi-bin/check.cgi?area_domain="+urllink);
@@ -186,15 +216,30 @@ listener.checkwww = function(){
 				//console.varDump(xmlDoc[2][2][1]['text']);//域名
 				//console.varDump(xmlDoc[2][3][1]['text']);
 				var command = db.prepare("insert into pandanet(
-						key,createDate,original,status
+						key,createDate,original,status,updateDate
 					) values (
-						@key,@createDate, @original,@status
+						@key,@createDate, @original,@status,@updateDate
 					);" ) 
 				command.bind.parameterByNamesAt( //绑定命名参数 
-					key = xmlDoc[2][2][1]['text'];createDate = time();original = xmlDoc[2][3][1]['text'];status=status;
+					key = xmlDoc[2][2][1]['text'];createDate = time();original = xmlDoc[2][3][1]['text'];status=status;updateDate=time();
 				);
 				command.step();//执行命令
 						
+			}else if(ischecked==1){
+				var str = http.get("http://panda.www.net.cn/cgi-bin/check.cgi?area_domain="+urllink);
+				var xmlDoc = string.xml(str)
+	
+				//console.log(xmlDoc[2][2][1]['text']+'  '+xmlDoc[2][3][1]['text']);
+				var status = 0;
+				if(tostring(xmlDoc[2][3][1]['text'])=='210 : Domain name is available'){
+					status = 1;
+				}
+				
+				db.exec("UPDATE pandanet SET status = @status,updateDate=@updateDate WHERE id = @id;",{
+					status = status;
+					updateDate = time();
+					id = result['id'];
+				} );
 			}
 		}
 	//	console.log("j:"+tostring(j))
@@ -202,7 +247,7 @@ listener.checkwww = function(){
 		
 	
 	}
-	
+	mainForm.static.text='正在校验:完毕';
 //	console.log("over");
 	//console.pause(true);
 	

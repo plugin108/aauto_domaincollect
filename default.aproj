@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<project ver="10" name="抓取网址是否注册信息" libEmbed="true" icon="..." ui="win" output="抓取网址是否注册信息.exe" CompanyName="单位名称" FileDescription="抓取网址是否注册信息" LegalCopyright="Copyright (C) 单位名称 2016" ProductName="抓取网址是否注册信息" InternalName="抓取网址是否注册信息" FileVersion="0.0.0.03" ProductVersion="0.0.0.03" publishDir="/Publish/" dstrip="false">
+<project ver="10" name="抓取网址是否注册信息" libEmbed="true" icon="..." ui="win" output="抓取网址是否注册信息.exe" CompanyName="单位名称" FileDescription="抓取网址是否注册信息" LegalCopyright="Copyright (C) 单位名称 2016" ProductName="抓取网址是否注册信息" InternalName="抓取网址是否注册信息" FileVersion="0.0.0.12" ProductVersion="0.0.0.12" publishDir="/Publish/" dstrip="false">
 	<file name="main.aardio" path="default.main.aardio" comment="default.main.aardio"/>
 	<folder name="资源文件" path="res" embed="true">
 		<folder name="筛选器" path="res\筛选器" comment="目录" embed="false"/>
