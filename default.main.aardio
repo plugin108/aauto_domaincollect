@@ -156,101 +156,73 @@ listener.checkwww = function(){
 	}
 	
 	
-	var flag = 1;
-		var tab={}
-		tab[0] ='';
-	//var tab = {};
-	var i = 1;
+	var tab={}
+	var i = 0;
 	//查找所有的分解字段
 	for key in db.each("SELECT key FROM parts") {
 		tab[i]=key;
 		i++;
 	}
-//	console.log(i);
 	
-	if(i==1){
-		flag = 0;
-	}
-	
-	var length = i**i;
-	var j = 1;
-	//console.log(i)
-	//console.log(length);
-	while(length >j){
-		import console;
-		//console.log(j);
-		win.delay(100);
-		try{
-			var str = '';
-			var flag = 1;
-			var temp = j;
-			
-			while(flag==1){
-				if(temp<i&&temp/i<1){
-					flag=0;
-					str = string.concat(str,tostring(tab[temp%i]));
-				}else{
-					str = string.concat(str,tostring(tab[temp%i]));
-					temp = (temp-temp%i)/i;	
-				}	
-			}
-			var urllink = str+".com";
-			
-			mainForm.static.text='正在校验：'+urllink+' 序号：'+j;
-			
-			var result = db.stepQuery("SELECT * FROM [pandanet]",{ key = urllink}) //可选使用表对象指定where条件参数
-			//console.varDump(result);
-			
-			
-			if(result == null ){
-			
-				var str = http.get("http://panda.www.net.cn/cgi-bin/check.cgi?area_domain="+urllink);
-				var xmlDoc = string.xml(str)
-	
-				//console.log(xmlDoc[2][2][1]['text']+'  '+xmlDoc[2][3][1]['text']);
-				var status = 0;
-				if(tostring(xmlDoc[2][3][1]['text'])=='210 : Domain name is available'){
-					status = 1;
-				}
-				//console.varDump(xmlDoc[2][1][1]['text']);//码
-				//console.varDump(xmlDoc[2][2][1]['text']);//域名
-				//console.varDump(xmlDoc[2][3][1]['text']);
-				var command = db.prepare("insert into pandanet(
-						key,createDate,original,status,updateDate
-					) values (
-						@key,@createDate, @original,@status,@updateDate
-					);" ) 
-				command.bind.parameterByNamesAt( //绑定命名参数 
-					key = xmlDoc[2][2][1]['text'];createDate = time();original = xmlDoc[2][3][1]['text'];status=status;updateDate=time();
-				);
-				command.step();//执行命令
-						
-			}else if(ischecked==1){
-				var str = http.get("http://panda.www.net.cn/cgi-bin/check.cgi?area_domain="+urllink);
-				var xmlDoc = string.xml(str)
-	
-				//console.log(xmlDoc[2][2][1]['text']+'  '+xmlDoc[2][3][1]['text']);
-				var status = 0;
-				if(tostring(xmlDoc[2][3][1]['text'])=='210 : Domain name is available'){
-					status = 1;
-				}
+	for(step1 = 0 ;(i-1);1){
+		for(step2 = 0;(i-1);1){
+			import console;
+			win.delay(100);
+			try{
+				var str = tab[step1]+''+tab[step2];
 				
-				db.exec("UPDATE pandanet SET status = @status,updateDate=@updateDate WHERE id = @id;",{
-					status = status;
-					updateDate = time();
-					id = result['id'];
-				} );
+				
+				var urllink = str+".com";
+				
+				mainForm.static.text='正在校验：'+urllink+' 序号：'+(step1*i+step2);
+				
+				var result = db.stepQuery("SELECT * FROM [pandanet]",{ key = urllink}) //可选使用表对象指定where条件参数
+				
+				
+				if(result == null ){
+				
+					var str = http.get("http://panda.www.net.cn/cgi-bin/check.cgi?area_domain="+urllink);
+					var xmlDoc = string.xml(str)
+		
+					//console.log(xmlDoc[2][2][1]['text']+'  '+xmlDoc[2][3][1]['text']);
+					var status = 0;
+					if(tostring(xmlDoc[2][3][1]['text'])=='210 : Domain name is available'){
+						status = 1;
+					}
+					//console.varDump(xmlDoc[2][1][1]['text']);//码
+					//console.varDump(xmlDoc[2][2][1]['text']);//域名
+					//console.varDump(xmlDoc[2][3][1]['text']);
+					var command = db.prepare("insert into pandanet(
+							key,createDate,original,status,updateDate
+						) values (
+							@key,@createDate, @original,@status,@updateDate
+						);" ) 
+					command.bind.parameterByNamesAt( //绑定命名参数 
+						key = xmlDoc[2][2][1]['text'];createDate = time();original = xmlDoc[2][3][1]['text'];status=status;updateDate=time();
+					);
+					command.step();//执行命令
+							
+				}else if(ischecked==1){
+					var str = http.get("http://panda.www.net.cn/cgi-bin/check.cgi?area_domain="+urllink);
+					var xmlDoc = string.xml(str)
+		
+					//console.log(xmlDoc[2][2][1]['text']+'  '+xmlDoc[2][3][1]['text']);
+					var status = 0;
+					if(tostring(xmlDoc[2][3][1]['text'])=='210 : Domain name is available'){
+						status = 1;
+					}
+					
+					db.exec("UPDATE pandanet SET status = @status,updateDate=@updateDate WHERE id = @id;",{
+						status = status;
+						updateDate = time();
+						id = result['id'];
+					} );
+				}
 			}
 		}
-	//	console.log("j:"+tostring(j))
-		j++;
-		
 	
 	}
 	mainForm.static.text='正在校验:完毕';
-//	console.log("over");
-	//console.pause(true);
-	
 } 
 
 
